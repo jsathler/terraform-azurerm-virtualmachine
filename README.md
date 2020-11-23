@@ -19,7 +19,7 @@ Terraform 0.12 and newer. Some examples will require Terraform 0.13 or later.
 
 ```hcl
 module "linux-vm01" {
-  source               = "jsathler/terraform-azurerm-virtualmachine"
+  source               = "jsathler/virtualmachine/azurerm"
   name                 = "linux-vm01"
   location             = "northeurope"
   resource_group_name  = "sample-rg"

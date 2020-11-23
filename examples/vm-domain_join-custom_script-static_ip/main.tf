@@ -79,7 +79,7 @@ module "linux-vm01" {
   image_publisher      = "OpenLogic"
   image_offer          = "CentOS"
   image_sku            = "8_2"
-  tags = local.tags
+  tags                 = local.tags
 }
 
 output "windows-vm01-output" {
