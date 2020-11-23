@@ -1,8 +1,5 @@
 # AzureRM Virtual Machine Terraform module
 
-![GitHub tag (latest by date)]
-
-
 Terraform module which creates Virtual Machine resources on Azure.
 
 These types of resources are supported:
