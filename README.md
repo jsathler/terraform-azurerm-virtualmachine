@@ -13,7 +13,7 @@ These types of resources are supported:
 
 ## Terraform versions
 
-Terraform 0.12 and newer. Some examples will require Terraform 0.13 or later.
+Terraform 1.3.0 and newer.
 
 ## Usage
 
@@ -26,10 +26,9 @@ module "linux-vm01" {
   local_admin_name     = "localadminuser"
   local_admin_password = "C0mp3lP@$$w0rd"
   subnet_id            = [<subnet-id>]
-  os_type              = "linux"
-  image_publisher      = "OpenLogic"
-  image_offer          = "CentOS"
-  image_sku            = "8_2"
+  image_publisher      = "canonical"
+  image_offer          = "0001-com-ubuntu-server-focal"
+  image_sku            = "20_04-lts-gen2"
 }
 ```
 

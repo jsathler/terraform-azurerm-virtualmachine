@@ -52,30 +52,116 @@ resource "azurerm_network_interface" "default" {
 #################################################################################################################################
 
 resource "azurerm_windows_virtual_machine" "default" {
-  count                        = var.os_type == lower("windows") ? 1 : 0
+  count                        = lower(var.os_type) == "windows" ? 1 : 0
   name                         = var.name
   location                     = var.location
   resource_group_name          = var.resource_group_name
   network_interface_ids        = azurerm_network_interface.default.*.id
   size                         = var.vm_size
-  license_type                 = var.os_type == lower("windows") && var.hybrid_enabled ? "Windows_Server" : null
+  license_type                 = lower(var.os_type) == "windows" && var.hybrid_enabled ? "Windows_Server" : null
   zone                         = var.availability_zone == null ? null : var.availability_zone
   availability_set_id          = var.availability_set_id
   proximity_placement_group_id = var.proximity_placement_group_id
+
+  patch_mode = var.patch_mode == null ? "Manual" : var.patch_mode
 
   admin_username = var.local_admin_name
   admin_password = var.local_admin_password
 
   source_image_id = var.image_id
-  source_image_reference {
-    publisher = var.image_publisher
-    offer     = var.image_offer
-    sku       = var.image_sku
-    version   = var.image_version
+  dynamic "source_image_reference" {
+    for_each = var.image_publisher == null ? [] : [var.image_publisher]
+    content {
+      publisher = var.image_publisher
+      offer     = var.image_offer
+      sku       = var.image_sku
+      version   = var.image_version
+    }
   }
 
-  custom_data              = var.custom_data
   enable_automatic_updates = var.enable_automatic_updates
+
+  dynamic "identity" {
+    for_each = var.identity_type == null ? [] : [var.identity_type]
+    content {
+      type         = var.identity_type
+      identity_ids = var.identity_ids
+    }
+  }
+
+  dynamic "boot_diagnostics" {
+    for_each = var.boot_diagnostics_sa == null ? [] : [var.boot_diagnostics_sa]
+    content {
+      storage_account_uri = var.boot_diagnostics_sa
+    }
+  }
+
+  os_disk {
+    name                 = "${var.name}-os"
+    storage_account_type = var.boot_disk_type
+    disk_size_gb         = var.boot_disk_size_gb
+    caching              = "ReadWrite"
+  }
+
+  dynamic "winrm_listener" {
+    for_each = var.winrm_protocol == null ? [] : [var.winrm_protocol]
+    content {
+      protocol        = var.winrm_protocol
+      certificate_url = var.winrm_certificate_url
+    }
+  }
+
+  tags = var.tags
+}
+
+#################################################################################################################################
+# Linux Virtual Machine
+#################################################################################################################################
+
+resource "azurerm_linux_virtual_machine" "default" {
+  count                        = lower(var.os_type) == "linux" ? 1 : 0
+  name                         = var.name
+  location                     = var.location
+  resource_group_name          = var.resource_group_name
+  network_interface_ids        = azurerm_network_interface.default.*.id
+  size                         = var.vm_size
+  zone                         = var.availability_zone == null ? null : var.availability_zone
+  availability_set_id          = var.availability_set_id
+  proximity_placement_group_id = var.proximity_placement_group_id
+
+  patch_mode = var.patch_mode == null ? "ImageDefault" : var.patch_mode
+
+  disable_password_authentication = var.local_admin_key == null ? false : true
+
+  admin_username = var.local_admin_name
+  admin_password = var.local_admin_password
+
+  dynamic "admin_ssh_key" {
+    for_each = var.local_admin_key == null ? [] : [var.local_admin_key]
+    content {
+      username   = var.local_admin_name
+      public_key = file(var.local_admin_key)
+    }
+  }
+
+  source_image_id = var.image_id
+  dynamic "source_image_reference" {
+    for_each = var.image_publisher == null ? [] : [var.image_publisher]
+    content {
+      publisher = var.image_publisher
+      offer     = var.image_offer
+      sku       = var.image_sku
+      version   = var.image_version
+    }
+  }
+
+  dynamic "identity" {
+    for_each = var.identity_type == null ? [] : [var.identity_type]
+    content {
+      type         = var.identity_type
+      identity_ids = var.identity_ids
+    }
+  }
 
   dynamic "boot_diagnostics" {
     for_each = var.boot_diagnostics_sa == null ? [] : [var.boot_diagnostics_sa]
@@ -95,71 +181,20 @@ resource "azurerm_windows_virtual_machine" "default" {
 }
 
 #################################################################################################################################
-# Linux Virtual Machine
-#################################################################################################################################
-
-resource "azurerm_linux_virtual_machine" "default" {
-  count                        = var.os_type == lower("linux") ? 1 : 0
-  name                         = var.name
-  location                     = var.location
-  resource_group_name          = var.resource_group_name
-  network_interface_ids        = azurerm_network_interface.default.*.id
-  size                         = var.vm_size
-  zone                         = var.availability_zone == null ? null : var.availability_zone
-  availability_set_id          = var.availability_set_id
-  proximity_placement_group_id = var.proximity_placement_group_id
-
-  disable_password_authentication = var.local_admin_key == null ? false : true
-
-  admin_username = var.local_admin_name
-  admin_password = var.local_admin_password
-
-  dynamic "admin_ssh_key" {
-    for_each = var.local_admin_key == null ? [] : [var.local_admin_key]
-    content {
-      username   = var.local_admin_name
-      public_key = file(var.local_admin_key)
-    }
-  }
-
-  source_image_id = var.image_id
-  source_image_reference {
-    publisher = var.image_publisher
-    offer     = var.image_offer
-    sku       = var.image_sku
-    version   = var.image_version
-  }
-
-  custom_data = var.custom_data
-
-  dynamic "boot_diagnostics" {
-    for_each = var.boot_diagnostics_sa == null ? [] : [var.boot_diagnostics_sa]
-    content {
-      storage_account_uri = var.boot_diagnostics_sa
-    }
-  }
-
-  os_disk {
-    name                 = "${var.name}-os"
-    storage_account_type = var.boot_disk_type
-    disk_size_gb         = var.boot_disk_size_gb
-    caching              = "ReadWrite"
-  }
-}
-
-#################################################################################################################################
 # Virtual Machine Disks
 #################################################################################################################################
 
 resource "azurerm_managed_disk" "default" {
-  for_each             = { for data_disk in var.data_disks : data_disk.name => data_disk }
-  name                 = "${var.name}-${each.value.name}"
+  for_each             = { for key, value in var.data_disks : key => value }
+  name                 = "${var.name}-${each.key}"
   location             = var.location
   resource_group_name  = var.resource_group_name
   disk_size_gb         = each.value.disk_size_gb
   storage_account_type = each.value.managed_disk_type
   create_option        = "Empty"
-  zones                = var.availability_zone == null ? null : [var.availability_zone]
+  zone                 = var.availability_zone == null ? null : var.availability_zone
+
+  tags = var.tags
 }
 
 #################################################################################################################################
@@ -167,9 +202,9 @@ resource "azurerm_managed_disk" "default" {
 #################################################################################################################################
 
 resource "azurerm_virtual_machine_data_disk_attachment" "default" {
-  for_each                  = { for data_disk in var.data_disks : data_disk.name => data_disk }
+  for_each                  = { for key, value in var.data_disks : key => value }
   managed_disk_id           = azurerm_managed_disk.default[each.key].id
-  virtual_machine_id        = var.os_type == lower("windows") ? azurerm_windows_virtual_machine.default[0].id : azurerm_linux_virtual_machine.default[0].id
+  virtual_machine_id        = lower(var.os_type) == "windows" ? azurerm_windows_virtual_machine.default[0].id : azurerm_linux_virtual_machine.default[0].id
   write_accelerator_enabled = each.value.write_accelerator_enabled
   lun                       = each.value.lunid
   caching                   = each.value.caching
@@ -180,7 +215,7 @@ resource "azurerm_virtual_machine_data_disk_attachment" "default" {
 #################################################################################################################################
 
 resource "azurerm_virtual_machine_extension" "ADDomainExtension" {
-  count                = var.domain_fqdn != null && var.os_type == lower("windows") ? 1 : 0
+  count                = var.domain_fqdn != null && lower(var.os_type) == "windows" ? 1 : 0
   name                 = "${var.name}-ADDomainExtension"
   virtual_machine_id   = azurerm_windows_virtual_machine.default[0].id
   publisher            = "Microsoft.Compute"
@@ -212,10 +247,10 @@ SETTINGS
 resource "azurerm_virtual_machine_extension" "CustomScriptExtension" {
   count                = var.post_deploy_uri != null ? 1 : 0
   name                 = "${var.name}-CustomScriptExtension"
-  virtual_machine_id   = var.os_type == lower("windows") ? azurerm_windows_virtual_machine.default[0].id : azurerm_linux_virtual_machine.default[0].id
-  publisher            = var.os_type == lower("windows") ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
-  type                 = var.os_type == lower("windows") ? "CustomScriptExtension" : "CustomScript"
-  type_handler_version = var.os_type == lower("windows") ? "1.10" : "2.1"
+  virtual_machine_id   = lower(var.os_type) == "windows" ? azurerm_windows_virtual_machine.default[0].id : azurerm_linux_virtual_machine.default[0].id
+  publisher            = lower(var.os_type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
+  type                 = lower(var.os_type) == "windows" ? "CustomScriptExtension" : "CustomScript"
+  type_handler_version = lower(var.os_type) == "windows" ? "1.10" : "2.1"
 
   settings = <<SETTINGS
     {
