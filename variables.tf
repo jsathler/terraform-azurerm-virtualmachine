@@ -183,7 +183,7 @@ variable "data_disks" {
 }
 
 variable "domain_fqdn" {
-  description = "Specifies the domain FQDN to be used to join the computer"
+  description = "Specifies the domain FQDN to be used to join the computer."
   type        = string
   default     = null
 }
@@ -213,19 +213,31 @@ variable "post_deploy_uri" {
 }
 
 variable "post_deploy_command" {
-  description = "Specifies the post-deploy command to be executed."
+  description = "Specifies the post-deploy command to be executed. If you define post_deploy_command, you should not define post_deploy_script variable"
+  type        = string
+  default     = null
+}
+
+variable "post_deploy_script" {
+  description = "A Base64-encoded and optionally gzip'ed script run by /bin/sh (linux only). If you define post_deploy_script, you should not define post_deploy_command variable"
   type        = string
   default     = null
 }
 
 variable "post_deploy_sa_name" {
-  description = "Specifies the storage account name where the post-deploy script is hosted. It is required if the storage account doesn't allow anonymous access."
+  description = "Specifies the storage account name where the post-deploy script is hosted. It is required if the storage account doesn't allow anonymous access and it must not be used in conjunction with the post_deploy_identity."
   type        = string
   default     = null
 }
 
 variable "post_deploy_sa_key" {
-  description = "Specifies the storage account key where the post-deploy script is hosted. It is required if the storage account doesn't allow anonymous access."
+  description = "Specifies the storage account key where the post-deploy script is hosted. It is required if the storage account doesn't allow anonymous access and it must not be used in conjunction with the post_deploy_identity."
+  type        = string
+  default     = null
+}
+
+variable "post_deploy_identity" {
+  description = "Specifies the Managed Identity to be used to access the post-deploy script. Set it as \"{}\" to use system-assigned identity, \"{ \"clientId\": \"<ID>\" } \" or \"{ \"objectId\": \"<ID>\" } \". It is required if the storage account doesn't allow anonymous access and it must not be used in conjunction with the post_deploy_sa_name or post_deploy_sa_key."
   type        = string
   default     = null
 }

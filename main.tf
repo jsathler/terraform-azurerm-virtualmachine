@@ -225,7 +225,7 @@ resource "azurerm_virtual_machine_extension" "ADDomainExtension" {
   settings           = <<SETTINGS
     {
         "Name": "${var.domain_fqdn}",
-        "OUPath": "${var.domain_ou}",
+        %{if(var.domain_ou) != null} "OUPath": "${var.domain_ou}" %{endif}
         "User": "${var.domain_fqdn}\\${var.domain_user_name}",
         "Restart": "true",
         "Options": "3"
@@ -245,7 +245,7 @@ SETTINGS
 #################################################################################################################################
 
 resource "azurerm_virtual_machine_extension" "CustomScriptExtension" {
-  count                = var.post_deploy_uri != null ? 1 : 0
+  count                = var.post_deploy_command != null || var.post_deploy_script != null ? 1 : 0
   name                 = "${var.name}-CustomScriptExtension"
   virtual_machine_id   = lower(var.os_type) == "windows" ? azurerm_windows_virtual_machine.default[0].id : azurerm_linux_virtual_machine.default[0].id
   publisher            = lower(var.os_type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
@@ -254,15 +254,17 @@ resource "azurerm_virtual_machine_extension" "CustomScriptExtension" {
 
   settings = <<SETTINGS
     {
-        "fileUris": ["${var.post_deploy_uri}"],
-        "commandToExecute": "${var.post_deploy_command}"
+        %{if(var.post_deploy_uri) != null} "fileUris": ["${var.post_deploy_uri}"], %{endif}
+        %{if(var.post_deploy_command) != null} "commandToExecute": "${var.post_deploy_command}" %{endif}
+        %{if(var.post_deploy_script) != null} "script": "${var.post_deploy_script}" %{endif}
     }
   SETTINGS
 
-  protected_settings = var.post_deploy_sa_name == null ? null : <<PROTECTED_SETTINGS
+  protected_settings = <<PROTECTED_SETTINGS
     {
-      "storageAccountName": "var.post_deploy_sa_name",
-      "storageAccountKey": "var.post_deploy_sa_key"      
+      %{if(var.post_deploy_identity) != null} "managedIdentity": "${var.post_deploy_identity}" %{endif}
+      %{if(var.post_deploy_sa_name) != null} "storageAccountName": "${var.post_deploy_sa_name}", %{endif}
+      %{if(var.post_deploy_sa_key) != null} "storageAccountKey": "${var.post_deploy_sa_key}" %{endif}      
     }
   PROTECTED_SETTINGS
 
