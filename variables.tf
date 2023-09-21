@@ -74,6 +74,12 @@ variable "subnet_id" {
   type        = list(string)
 }
 
+variable "application_security_group_id" {
+  description = " The ID of the Application Security Group which this Network Interface which should be connected to. This parameter is optional"
+  type        = list(string)
+  default     = null
+}
+
 variable "vm_size" {
   description = "The size of the VM. Defaults to Standard_D2s_v5"
   type        = string

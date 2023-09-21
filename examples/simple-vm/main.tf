@@ -27,6 +27,12 @@ resource "azurerm_subnet" "default" {
   address_prefixes     = ["10.0.0.0/24"]
 }
 
+resource "azurerm_application_security_group" "default" {
+  name                = "default-asg"
+  location            = azurerm_resource_group.default.location
+  resource_group_name = azurerm_resource_group.default.name
+}
+
 resource "random_password" "default" {
   length = 16
 }
@@ -36,16 +42,17 @@ resource "random_password" "default" {
 #################################################################################################################################
 
 module "linux-vm01" {
-  source               = "../../"
-  name                 = "linux-vm01"
-  location             = local.location
-  resource_group_name  = azurerm_resource_group.default.name
-  local_admin_name     = local.local_user_name
-  local_admin_password = random_password.default.result
-  subnet_id            = [azurerm_subnet.default.id]
-  image_publisher      = "canonical"
-  image_offer          = "0001-com-ubuntu-server-focal"
-  image_sku            = "20_04-lts-gen2"
+  source                        = "../../"
+  name                          = "linux-vm01"
+  location                      = local.location
+  resource_group_name           = azurerm_resource_group.default.name
+  local_admin_name              = local.local_user_name
+  local_admin_password          = random_password.default.result
+  subnet_id                     = [azurerm_subnet.default.id]
+  application_security_group_id = [azurerm_application_security_group.default.id]
+  image_publisher               = "canonical"
+  image_offer                   = "0001-com-ubuntu-server-focal"
+  image_sku                     = "20_04-lts-gen2"
 }
 
 #################################################################################################################

@@ -47,6 +47,12 @@ resource "azurerm_network_interface" "default" {
   tags = var.tags
 }
 
+resource "azurerm_network_interface_application_security_group_association" "default" {
+  count                         = var.application_security_group_id != null ? length(var.application_security_group_id) : 0
+  network_interface_id          = azurerm_network_interface.default[count.index].id
+  application_security_group_id = var.application_security_group_id[count.index]
+}
+
 #################################################################################################################################
 # Windows Virtual Machine
 #################################################################################################################################
