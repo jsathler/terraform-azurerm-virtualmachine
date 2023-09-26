@@ -1,6 +1,6 @@
 locals {
   location            = "NorthEurope"
-  resource_group_name = "domainjoin-customscript-vm-rg"
+  resource_group_name = "domainjoincustomscriptvm-example-rg"
   local_user_name     = "localadmin"
   domain_fqdn         = "<domain-fqdn>"
   domain_ou           = "<OU-DN-to-create-machine-account>"
@@ -60,7 +60,7 @@ module "windows-vm01" {
   os_type              = "windows"
   image_publisher      = "MicrosoftWindowsServer"
   image_offer          = "WindowsServer"
-  image_sku            = "2019-Datacenter"
+  image_sku            = "2022-datacenter-azure-edition"
   tags                 = local.tags
 }
 
@@ -80,8 +80,8 @@ module "linux-vm01" {
   subnet_id                     = [local.app_subnet_id]
   enable_accelerated_networking = false
   image_publisher               = "canonical"
-  image_offer                   = "0001-com-ubuntu-server-focal"
-  image_sku                     = "20_04-lts-gen2"
+  image_offer                   = "0001-com-ubuntu-server-jammy"
+  image_sku                     = "22_04-lts-gen2"
   tags                          = local.tags
 }
 

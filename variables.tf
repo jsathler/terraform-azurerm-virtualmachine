@@ -4,6 +4,12 @@ variable "public_ip" {
   default     = false
 }
 
+variable "public_ip_id" {
+  description = "To assign an existing Public IP to your VM, set this variable. public_ip_id takes precedence over public_ip variable. Defaults to 'null'."
+  type        = string
+  default     = null
+}
+
 variable "public_ip_sku" {
   description = "The SKU of the Public IP. Accepted values are Basic and Standard. If Availability zones are used, you should define 'Standard' and define the 'public_ip_allocation_method' parameter as 'Static'. Defaults to Standard"
   type        = string
@@ -78,6 +84,18 @@ variable "application_security_group_id" {
   description = " The ID of the Application Security Group which this Network Interface which should be connected to. This parameter is optional"
   type        = list(string)
   default     = null
+}
+
+variable "secure_boot_enabled" {
+  description = "Specifies if Secure Boot and Trusted Launch is enabled for the Virtual Machine. This parameter is optional and defaults to 'true'"
+  type        = bool
+  default     = true
+}
+
+variable "vtpm_enabled" {
+  description = "Specifies if vTPM (virtual Trusted Platform Module) and Trusted Launch is enabled for the Virtual Machine. This parameter is optional and defaults to 'true'"
+  type        = bool
+  default     = true
 }
 
 variable "vm_size" {
@@ -188,6 +206,12 @@ variable "data_disks" {
   default = {}
 }
 
+variable "azuread_join" {
+  description = "Specifies if you want to join this VM to Azure AD. Authenticating to Azure AD requires enabling System Managed Identity (identity_type). Defaults to 'false'"
+  type        = bool
+  default     = false
+}
+
 variable "domain_fqdn" {
   description = "Specifies the domain FQDN to be used to join the computer."
   type        = string
@@ -267,12 +291,12 @@ variable "proximity_placement_group_id" {
 }
 
 variable "identity_type" {
-  description = "The type of Managed Identity which should be assigned to the Virtual Machine. Possible values are SystemAssigned, UserAssigned or SystemAssigned, UserAssigned. Defaults to null"
+  description = "The type of Managed Identity which should be assigned to the Virtual Machine. Possible values are 'SystemAssigned', 'UserAssigned' or 'SystemAssigned, UserAssigned'. Defaults to null"
   type        = string
   default     = null
   validation {
-    condition     = var.identity_type == null ? true : can(index(["systemassigned", "userassigned", "systemassigned, userassigned"], lower(var.identity_type)) >= 0)
-    error_message = "Valid values are SystemAssigned, UserAssigned or SystemAssigned, UserAssigned."
+    condition     = var.identity_type == null ? true : can(index(["SystemAssigned", "UserAssigned", "SystemAssigned, UserAssigned"], var.identity_type) >= 0)
+    error_message = "Valid values are 'SystemAssigned', 'UserAssigned' or 'SystemAssigned, UserAssigned'."
   }
 }
 

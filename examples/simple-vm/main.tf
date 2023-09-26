@@ -1,6 +1,6 @@
 locals {
   location            = "NorthEurope"
-  resource_group_name = "simple-vm-rg"
+  resource_group_name = "simplevm-example-rg"
   local_user_name     = "localadmin"
 }
 
@@ -14,7 +14,7 @@ resource "azurerm_resource_group" "default" {
 }
 
 resource "azurerm_virtual_network" "default" {
-  name                = "azvm-sample-vnet"
+  name                = "azvm-example-vnet"
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.default.name
   address_space       = ["10.0.0.0/16"]
@@ -51,8 +51,8 @@ module "linux-vm01" {
   subnet_id                     = [azurerm_subnet.default.id]
   application_security_group_id = [azurerm_application_security_group.default.id]
   image_publisher               = "canonical"
-  image_offer                   = "0001-com-ubuntu-server-focal"
-  image_sku                     = "20_04-lts-gen2"
+  image_offer                   = "0001-com-ubuntu-server-jammy"
+  image_sku                     = "22_04-lts-gen2"
 }
 
 #################################################################################################################
@@ -70,7 +70,7 @@ module "windows-vm01" {
   os_type              = "windows"
   image_publisher      = "MicrosoftWindowsServer"
   image_offer          = "WindowsServer"
-  image_sku            = "2019-Datacenter"
+  image_sku            = "2022-datacenter-azure-edition"
   winrm_protocol       = "Http"
 }
 

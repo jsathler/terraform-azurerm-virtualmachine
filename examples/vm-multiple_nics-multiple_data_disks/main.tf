@@ -1,6 +1,6 @@
 locals {
   location            = "NorthEurope"
-  resource_group_name = "multiplenic-multipledatadisk-vm-rg"
+  resource_group_name = "multiplenicanddatadisk-example-vm-rg"
   local_user_name     = "localadmin"
 
   tags = {
@@ -21,7 +21,7 @@ resource "azurerm_resource_group" "default" {
 }
 
 resource "azurerm_virtual_network" "default" {
-  name                = "azvm-sample-vnet"
+  name                = "azvm-example-vnet"
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.default.name
   address_space       = ["10.0.0.0/16"]
@@ -61,8 +61,8 @@ module "linux-vm01" {
   subnet_id            = [azurerm_subnet.app.id, azurerm_subnet.management.id]
   public_ip            = true
   image_publisher      = "canonical"
-  image_offer          = "0001-com-ubuntu-server-focal"
-  image_sku            = "20_04-lts-gen2"
+  image_offer          = "0001-com-ubuntu-server-jammy"
+  image_sku            = "22_04-lts-gen2"
   boot_disk_type       = "Standard_LRS"
   identity_type        = "SystemAssigned"
   data_disks = {

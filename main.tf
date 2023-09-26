@@ -13,8 +13,8 @@
 #################################################################################################################################
 
 resource "azurerm_public_ip" "default" {
-  count               = var.public_ip ? 1 : 0
-  name                = "${var.name}-PublicIP01"
+  count               = var.public_ip && var.public_ip_id == null ? 1 : 0
+  name                = "${var.name}-pip"
   location            = var.location
   resource_group_name = var.resource_group_name
   allocation_method   = var.availability_zone == null ? var.public_ip_allocation_method : "Static"
@@ -30,21 +30,20 @@ resource "azurerm_public_ip" "default" {
 
 resource "azurerm_network_interface" "default" {
   count                         = length(var.subnet_id)
-  name                          = "${var.name}-nic${format("%02d", count.index + 1)}"
+  name                          = "${var.name}-${count.index + 1}-nic"
   location                      = var.location
   resource_group_name           = var.resource_group_name
   enable_accelerated_networking = var.enable_accelerated_networking
   enable_ip_forwarding          = var.enable_ip_forwarding
+  tags                          = var.tags
 
   ip_configuration {
-    name                          = "${var.name}-PrivateIP${format("%02d", count.index + 1)}"
+    name                          = "ipconfig"
     subnet_id                     = element(var.subnet_id, count.index)
     private_ip_address_allocation = var.private_ip_address != null ? "Static" : "Dynamic"
     private_ip_address            = var.private_ip_address != null ? element(var.private_ip_address, count.index) : null
-    public_ip_address_id          = length(azurerm_public_ip.default.*.id) > 0 && count.index == 0 ? azurerm_public_ip.default.0.id : null
+    public_ip_address_id          = var.public_ip_id != null ? var.public_ip_id : length(azurerm_public_ip.default.*.id) > 0 && count.index == 0 ? azurerm_public_ip.default.0.id : null
   }
-
-  tags = var.tags
 }
 
 resource "azurerm_network_interface_application_security_group_association" "default" {
@@ -68,6 +67,9 @@ resource "azurerm_windows_virtual_machine" "default" {
   zone                         = var.availability_zone == null ? null : var.availability_zone
   availability_set_id          = var.availability_set_id
   proximity_placement_group_id = var.proximity_placement_group_id
+  secure_boot_enabled          = var.secure_boot_enabled
+  vtpm_enabled                 = var.vtpm_enabled
+  tags                         = var.tags
 
   patch_mode = var.patch_mode == null ? "Manual" : var.patch_mode
 
@@ -103,7 +105,7 @@ resource "azurerm_windows_virtual_machine" "default" {
   }
 
   os_disk {
-    name                 = "${var.name}-os"
+    name                 = "${var.name}-osdisk"
     storage_account_type = var.boot_disk_type
     disk_size_gb         = var.boot_disk_size_gb
     caching              = "ReadWrite"
@@ -116,8 +118,6 @@ resource "azurerm_windows_virtual_machine" "default" {
       certificate_url = var.winrm_certificate_url
     }
   }
-
-  tags = var.tags
 }
 
 #################################################################################################################################
@@ -134,6 +134,9 @@ resource "azurerm_linux_virtual_machine" "default" {
   zone                         = var.availability_zone == null ? null : var.availability_zone
   availability_set_id          = var.availability_set_id
   proximity_placement_group_id = var.proximity_placement_group_id
+  secure_boot_enabled          = var.secure_boot_enabled
+  vtpm_enabled                 = var.vtpm_enabled
+  tags                         = var.tags
 
   patch_mode = var.patch_mode == null ? "ImageDefault" : var.patch_mode
 
@@ -177,13 +180,11 @@ resource "azurerm_linux_virtual_machine" "default" {
   }
 
   os_disk {
-    name                 = "${var.name}-os"
+    name                 = "${var.name}-osdisk"
     storage_account_type = var.boot_disk_type
     disk_size_gb         = var.boot_disk_size_gb
     caching              = "ReadWrite"
   }
-
-  tags = var.tags
 }
 
 #################################################################################################################################
@@ -192,7 +193,7 @@ resource "azurerm_linux_virtual_machine" "default" {
 
 resource "azurerm_managed_disk" "default" {
   for_each             = { for key, value in var.data_disks : key => value }
-  name                 = "${var.name}-${each.key}"
+  name                 = "${var.name}-${each.key}-disk"
   location             = var.location
   resource_group_name  = var.resource_group_name
   disk_size_gb         = each.value.disk_size_gb
@@ -221,12 +222,14 @@ resource "azurerm_virtual_machine_data_disk_attachment" "default" {
 #################################################################################################################################
 
 resource "azurerm_virtual_machine_extension" "ADDomainExtension" {
-  count                = var.domain_fqdn != null && lower(var.os_type) == "windows" ? 1 : 0
-  name                 = "${var.name}-ADDomainExtension"
-  virtual_machine_id   = azurerm_windows_virtual_machine.default[0].id
-  publisher            = "Microsoft.Compute"
-  type                 = "JsonADDomainExtension"
-  type_handler_version = "1.3"
+  count                      = var.domain_fqdn != null && lower(var.os_type) == "windows" ? 1 : 0
+  name                       = "${var.name}-ADDomainExtension"
+  virtual_machine_id         = azurerm_windows_virtual_machine.default[0].id
+  publisher                  = "Microsoft.Compute"
+  type                       = "JsonADDomainExtension"
+  type_handler_version       = "1.3"
+  auto_upgrade_minor_version = true
+  tags                       = var.tags
 
   settings           = <<SETTINGS
     {
@@ -251,12 +254,14 @@ SETTINGS
 #################################################################################################################################
 
 resource "azurerm_virtual_machine_extension" "CustomScriptExtension" {
-  count                = var.post_deploy_command != null || var.post_deploy_script != null ? 1 : 0
-  name                 = "${var.name}-CustomScriptExtension"
-  virtual_machine_id   = lower(var.os_type) == "windows" ? azurerm_windows_virtual_machine.default[0].id : azurerm_linux_virtual_machine.default[0].id
-  publisher            = lower(var.os_type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
-  type                 = lower(var.os_type) == "windows" ? "CustomScriptExtension" : "CustomScript"
-  type_handler_version = lower(var.os_type) == "windows" ? "1.10" : "2.1"
+  count                      = var.post_deploy_command != null || var.post_deploy_script != null ? 1 : 0
+  name                       = "${var.name}-CustomScriptExtension"
+  virtual_machine_id         = lower(var.os_type) == "windows" ? azurerm_windows_virtual_machine.default[0].id : azurerm_linux_virtual_machine.default[0].id
+  publisher                  = lower(var.os_type) == "windows" ? "Microsoft.Compute" : "Microsoft.Azure.Extensions"
+  type                       = lower(var.os_type) == "windows" ? "CustomScriptExtension" : "CustomScript"
+  type_handler_version       = lower(var.os_type) == "windows" ? "1.10" : "2.1"
+  auto_upgrade_minor_version = true
+  tags                       = var.tags
 
   settings = <<SETTINGS
     {
@@ -275,4 +280,20 @@ resource "azurerm_virtual_machine_extension" "CustomScriptExtension" {
   PROTECTED_SETTINGS
 
   depends_on = [azurerm_virtual_machine_extension.ADDomainExtension, azurerm_linux_virtual_machine.default]
+}
+
+#################################################################################################################################
+# Windows Azure AD join
+#################################################################################################################################
+
+resource "azurerm_virtual_machine_extension" "AADLogin" {
+  count = var.azuread_join && var.identity_type != null ? 1 : 0
+
+  name                       = "${var.name}-AADLogin"
+  virtual_machine_id         = lower(var.os_type) == "windows" ? azurerm_windows_virtual_machine.default[0].id : azurerm_linux_virtual_machine.default[0].id
+  publisher                  = "Microsoft.Azure.ActiveDirectory"
+  type                       = lower(var.os_type) == "windows" ? "AADLoginForWindows" : "AADSSHLoginForLinux"
+  type_handler_version       = "1.0"
+  auto_upgrade_minor_version = true
+  tags                       = var.tags
 }
