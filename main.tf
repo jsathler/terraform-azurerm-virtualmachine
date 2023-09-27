@@ -63,7 +63,7 @@ resource "azurerm_windows_virtual_machine" "default" {
   resource_group_name          = var.resource_group_name
   network_interface_ids        = azurerm_network_interface.default.*.id
   size                         = var.vm_size
-  license_type                 = lower(var.os_type) == "windows" && var.hybrid_enabled ? "Windows_Server" : null
+  license_type                 = var.license_type
   zone                         = var.availability_zone == null ? null : var.availability_zone
   availability_set_id          = var.availability_set_id
   proximity_placement_group_id = var.proximity_placement_group_id
@@ -131,6 +131,7 @@ resource "azurerm_linux_virtual_machine" "default" {
   resource_group_name          = var.resource_group_name
   network_interface_ids        = azurerm_network_interface.default.*.id
   size                         = var.vm_size
+  license_type                 = var.license_type
   zone                         = var.availability_zone == null ? null : var.availability_zone
   availability_set_id          = var.availability_set_id
   proximity_placement_group_id = var.proximity_placement_group_id

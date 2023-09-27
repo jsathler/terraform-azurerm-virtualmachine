@@ -104,10 +104,10 @@ variable "vm_size" {
   default     = "Standard_D2s_v5"
 }
 
-variable "hybrid_enabled" {
-  description = "Controls if 'Hybrid license' should be enabled. Defaults to true."
-  type        = bool
-  default     = true
+variable "license_type" {
+  description = "Specifies the type of 'Azure Hybrid Use Benefit' should be used for this Virtual Machine. Possible values are 'Windows_Client', 'Windows_Server', 'RHEL_BYOS' and 'SLES_BYOS'"
+  type        = string
+  default     = null
 }
 
 variable "availability_zone" {
