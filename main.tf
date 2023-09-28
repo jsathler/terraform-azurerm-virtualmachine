@@ -97,11 +97,8 @@ resource "azurerm_windows_virtual_machine" "default" {
     }
   }
 
-  dynamic "boot_diagnostics" {
-    for_each = var.boot_diagnostics_sa == null ? [] : [var.boot_diagnostics_sa]
-    content {
-      storage_account_uri = var.boot_diagnostics_sa
-    }
+  boot_diagnostics {
+    storage_account_uri = var.boot_diagnostics_sa
   }
 
   os_disk {
@@ -173,11 +170,8 @@ resource "azurerm_linux_virtual_machine" "default" {
     }
   }
 
-  dynamic "boot_diagnostics" {
-    for_each = var.boot_diagnostics_sa == null ? [] : [var.boot_diagnostics_sa]
-    content {
-      storage_account_uri = var.boot_diagnostics_sa
-    }
+  boot_diagnostics {
+    storage_account_uri = var.boot_diagnostics_sa
   }
 
   os_disk {
