@@ -1,0 +1,36 @@
+---
+formatter: markdown
+
+header-from: main.tf
+footer-from: ""
+
+content: |-
+  {{ include "docs/description.md" }}
+
+  {{ .Requirements }}
+
+  {{ .Providers }}
+  
+  {{ .Resources }}
+
+  {{ .Inputs }}
+
+  {{ .Outputs }}
+
+  ## Examples
+  ```hcl
+  {{ include "docs/sample.tf" }}
+  ```
+  More examples in ./examples folder
+
+output:
+  file: README.md
+  mode: replace
+  template: "{{ .Content }}\n"
+
+sort:
+  enabled: true
+  by: name
+
+settings:
+  lockfile: false
