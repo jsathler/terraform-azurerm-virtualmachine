@@ -229,7 +229,7 @@ resource "azurerm_virtual_machine_extension" "ADDomainExtension" {
   settings           = <<SETTINGS
     {
         "Name": "${var.domain_fqdn}",
-        %{if(var.domain_ou) != null} "OUPath": "${var.domain_ou}" %{endif}
+        %{if(var.domain_ou) != null} "OUPath": "${var.domain_ou}", %{endif}
         "User": "${var.domain_fqdn}\\${var.domain_user_name}",
         "Restart": "true",
         "Options": "3"
