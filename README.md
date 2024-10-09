@@ -16,14 +16,14 @@ Supported Azure services:
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.0.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9.2 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 4.4.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.0.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 4.4.0 |
 
 ## Resources
 
@@ -44,6 +44,7 @@ Supported Azure services:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_accelerated_networking_enabled"></a> [accelerated\_networking\_enabled](#input\_accelerated\_networking\_enabled) | Controls if 'Accelerated Networking' should be enabled on NIC. Defaults to true | `bool` | `true` | no |
 | <a name="input_application_security_group_id"></a> [application\_security\_group\_id](#input\_application\_security\_group\_id) | The ID of the Application Security Group which this Network Interface which should be connected to. This parameter is optional | `list(string)` | `null` | no |
 | <a name="input_availability_set_id"></a> [availability\_set\_id](#input\_availability\_set\_id) | The ID of the Availability Set in which the Virtual Machine should exist. Changing this forces a new resource to be created. | `string` | `null` | no |
 | <a name="input_availability_zone"></a> [availability\_zone](#input\_availability\_zone) | The availability zone where the VM will be deployed. Defaults to null. | `number` | `null` | no |
@@ -51,14 +52,12 @@ Supported Azure services:
 | <a name="input_boot_diagnostics_sa"></a> [boot\_diagnostics\_sa](#input\_boot\_diagnostics\_sa) | Specifies the storage account to host boot diagnostics logs in format 'https://<storage-account-name>.blob.core.windows.net'. If you don't specify a storage account, a Managed Storage Account will be used to store Boot Diagnostics. | `string` | `null` | no |
 | <a name="input_boot_disk_size_gb"></a> [boot\_disk\_size\_gb](#input\_boot\_disk\_size\_gb) | The size of the VM OS disk. This parameter is optional | `string` | `null` | no |
 | <a name="input_boot_disk_type"></a> [boot\_disk\_type](#input\_boot\_disk\_type) | Specifies the type of managed disk to create for the OS disk. Valid values are Standard\_LRS, StandardSSD\_LRS or Premium\_LRS. Defaults to StandardSSD\_LRS. | `string` | `"StandardSSD_LRS"` | no |
-| <a name="input_data_disks"></a> [data\_disks](#input\_data\_disks) | Data disks to be added to the VM. It is a MAP of object, which requires: caching, disk\_size\_gb, managed\_disk\_type, lun and write\_accelerator\_enabled. | <pre>map(<br>    object({<br>      caching                   = optional(string, "None"),<br>      disk_size_gb              = number,<br>      managed_disk_type         = optional(string, "StandardSSD_LRS"),<br>      lunid                     = number,<br>      write_accelerator_enabled = optional(bool, false)<br>  }))</pre> | `{}` | no |
+| <a name="input_data_disks"></a> [data\_disks](#input\_data\_disks) | Data disks to be added to the VM. It is a MAP of object, which requires: caching, disk\_size\_gb, managed\_disk\_type, lun and write\_accelerator\_enabled. | <pre>map(<br/>    object({<br/>      caching                   = optional(string, "None"),<br/>      disk_size_gb              = number,<br/>      managed_disk_type         = optional(string, "StandardSSD_LRS"),<br/>      lunid                     = number,<br/>      write_accelerator_enabled = optional(bool, false)<br/>  }))</pre> | `{}` | no |
 | <a name="input_domain_fqdn"></a> [domain\_fqdn](#input\_domain\_fqdn) | Specifies the domain FQDN to be used to join the computer. | `string` | `null` | no |
 | <a name="input_domain_ou"></a> [domain\_ou](#input\_domain\_ou) | Specifies the domain OU to be used to join the computer in format 'OU=servers,DC=domain,DC=com''. | `string` | `null` | no |
 | <a name="input_domain_user_name"></a> [domain\_user\_name](#input\_domain\_user\_name) | Specifies the domain username to be used to join the computer to domain. | `string` | `null` | no |
 | <a name="input_domain_user_password"></a> [domain\_user\_password](#input\_domain\_user\_password) | Specifies the domain password. | `string` | `null` | no |
-| <a name="input_enable_accelerated_networking"></a> [enable\_accelerated\_networking](#input\_enable\_accelerated\_networking) | Controls if 'Accelerated Networking' should be enabled on NIC. Defaults to true | `bool` | `true` | no |
 | <a name="input_enable_automatic_updates"></a> [enable\_automatic\_updates](#input\_enable\_automatic\_updates) | Specifies if Automatic Updates are Enabled for the Windows Virtual Machine. Defaults to false. | `bool` | `false` | no |
-| <a name="input_enable_ip_forwarding"></a> [enable\_ip\_forwarding](#input\_enable\_ip\_forwarding) | Define if IP Forwarding should be enabled. Defaults to false. | `bool` | `false` | no |
 | <a name="input_identity_ids"></a> [identity\_ids](#input\_identity\_ids) | A list of User Managed Identity ID's which should be assigned to the Virtual Machine. Defaults to null | `list(string)` | `null` | no |
 | <a name="input_identity_type"></a> [identity\_type](#input\_identity\_type) | The type of Managed Identity which should be assigned to the Virtual Machine. Possible values are 'SystemAssigned', 'UserAssigned' or 'SystemAssigned, UserAssigned'. Defaults to null | `string` | `null` | no |
 | <a name="input_image_id"></a> [image\_id](#input\_image\_id) | The ID of the Operating System Image to be used as source. If not declared, you should declare image\_publisher, image\_offer and image\_sku. | `string` | `null` | no |
@@ -66,6 +65,7 @@ Supported Azure services:
 | <a name="input_image_publisher"></a> [image\_publisher](#input\_image\_publisher) | Specifies the publisher of the image used to create the virtual machine. | `string` | `null` | no |
 | <a name="input_image_sku"></a> [image\_sku](#input\_image\_sku) | Specifies the SKU of the image used to create the virtual machine. | `string` | `null` | no |
 | <a name="input_image_version"></a> [image\_version](#input\_image\_version) | Specifies the version of the image used to create the virtual machine. Defaults to latest. | `string` | `"latest"` | no |
+| <a name="input_ip_forwarding_enabled"></a> [ip\_forwarding\_enabled](#input\_ip\_forwarding\_enabled) | Define if IP Forwarding should be enabled. Defaults to false. | `bool` | `false` | no |
 | <a name="input_license_type"></a> [license\_type](#input\_license\_type) | Specifies the type of 'Azure Hybrid Use Benefit' should be used for this Virtual Machine. Possible values are 'Windows\_Client', 'Windows\_Server', 'RHEL\_BYOS' and 'SLES\_BYOS' | `string` | `null` | no |
 | <a name="input_local_admin_key"></a> [local\_admin\_key](#input\_local\_admin\_key) | The Public Key which should be used for authentication, which needs to be at least 2048-bit and in ssh-rsa format. | `string` | `null` | no |
 | <a name="input_local_admin_name"></a> [local\_admin\_name](#input\_local\_admin\_name) | Specifies the local admin username to be created. This parameter is required | `string` | n/a | yes |
