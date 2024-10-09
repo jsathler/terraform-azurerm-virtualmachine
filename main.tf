@@ -29,13 +29,13 @@ resource "azurerm_public_ip" "default" {
 #################################################################################################################################
 
 resource "azurerm_network_interface" "default" {
-  count                         = length(var.subnet_id)
-  name                          = "${var.name}-${count.index + 1}-nic"
-  location                      = var.location
-  resource_group_name           = var.resource_group_name
-  enable_accelerated_networking = var.enable_accelerated_networking
-  enable_ip_forwarding          = var.enable_ip_forwarding
-  tags                          = var.tags
+  count                          = length(var.subnet_id)
+  name                           = "${var.name}-${count.index + 1}-nic"
+  location                       = var.location
+  resource_group_name            = var.resource_group_name
+  accelerated_networking_enabled = var.accelerated_networking_enabled
+  ip_forwarding_enabled          = var.ip_forwarding_enabled
+  tags                           = var.tags
 
   ip_configuration {
     name                          = "ipconfig"
@@ -282,8 +282,8 @@ resource "azurerm_virtual_machine_extension" "CustomScriptExtension" {
 #################################################################################################################################
 
 resource "azurerm_virtual_machine_extension" "AADLogin" {
-  count = var.azuread_join && var.identity_type != null ? 1 : 0
-
+  depends_on                 = [azurerm_virtual_machine_extension.ADDomainExtension]
+  count                      = var.azuread_join && var.identity_type != null ? 1 : 0
   name                       = "${var.name}-AADLogin"
   virtual_machine_id         = lower(var.os_type) == "windows" ? azurerm_windows_virtual_machine.default[0].id : azurerm_linux_virtual_machine.default[0].id
   publisher                  = "Microsoft.Azure.ActiveDirectory"
