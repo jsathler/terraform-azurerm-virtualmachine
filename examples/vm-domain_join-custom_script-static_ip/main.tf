@@ -12,6 +12,8 @@ locals {
     Application = "App01"
   }
 }
+
+#In version 4.0 of the Azure Provider, it's now required to specify the Azure Subscription ID when configuring a provider instance in your configuration. This can be done by specifying the subscription_id provider property, or by exporting the ARM_SUBSCRIPTION_ID environment variable
 provider "azurerm" {
   features {}
 }
@@ -69,20 +71,20 @@ module "windows-vm01" {
 #################################################################################################################
 
 module "linux-vm01" {
-  source                        = "../../"
-  name                          = "linux-vm01"
-  location                      = local.location
-  resource_group_name           = azurerm_resource_group.default.name
-  local_admin_name              = local.local_user_name
-  local_admin_password          = random_password.default.result
-  post_deploy_uri               = "https://<storage-account>.blob.core.windows.net/customscript/post-deploy.sh"
-  post_deploy_command           = "sh post-deploy.sh"
-  subnet_id                     = [local.app_subnet_id]
-  enable_accelerated_networking = false
-  image_publisher               = "canonical"
-  image_offer                   = "0001-com-ubuntu-server-jammy"
-  image_sku                     = "22_04-lts-gen2"
-  tags                          = local.tags
+  source                         = "../../"
+  name                           = "linux-vm01"
+  location                       = local.location
+  resource_group_name            = azurerm_resource_group.default.name
+  local_admin_name               = local.local_user_name
+  local_admin_password           = random_password.default.result
+  post_deploy_uri                = "https://<storage-account>.blob.core.windows.net/customscript/post-deploy.sh"
+  post_deploy_command            = "sh post-deploy.sh"
+  subnet_id                      = [local.app_subnet_id]
+  accelerated_networking_enabled = false
+  image_publisher                = "canonical"
+  image_offer                    = "0001-com-ubuntu-server-jammy"
+  image_sku                      = "22_04-lts-gen2"
+  tags                           = local.tags
 }
 
 output "windows-vm01-output" {

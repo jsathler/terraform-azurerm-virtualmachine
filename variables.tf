@@ -42,13 +42,13 @@ variable "private_ip_address" {
   default     = null
 }
 
-variable "enable_ip_forwarding" {
+variable "ip_forwarding_enabled" {
   description = "Define if IP Forwarding should be enabled. Defaults to false."
   type        = bool
   default     = false
 }
 
-variable "enable_accelerated_networking" {
+variable "accelerated_networking_enabled" {
   description = "Controls if 'Accelerated Networking' should be enabled on NIC. Defaults to true"
   type        = bool
   default     = true
