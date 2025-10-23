@@ -87,7 +87,7 @@ resource "azurerm_windows_virtual_machine" "default" {
     }
   }
 
-  enable_automatic_updates = var.enable_automatic_updates
+  automatic_updates_enabled = var.automatic_updates_enabled
 
   dynamic "identity" {
     for_each = var.identity_type == null ? [] : [var.identity_type]

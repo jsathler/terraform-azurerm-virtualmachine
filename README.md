@@ -17,13 +17,13 @@ Supported Azure services:
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9.2 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 4.4.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 4.49.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 4.4.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 4.49.0 |
 
 ## Resources
 
@@ -46,6 +46,7 @@ Supported Azure services:
 |------|-------------|------|---------|:--------:|
 | <a name="input_accelerated_networking_enabled"></a> [accelerated\_networking\_enabled](#input\_accelerated\_networking\_enabled) | Controls if 'Accelerated Networking' should be enabled on NIC. Defaults to true | `bool` | `true` | no |
 | <a name="input_application_security_group_id"></a> [application\_security\_group\_id](#input\_application\_security\_group\_id) | The ID of the Application Security Group which this Network Interface which should be connected to. This parameter is optional | `list(string)` | `null` | no |
+| <a name="input_automatic_updates_enabled"></a> [automatic\_updates\_enabled](#input\_automatic\_updates\_enabled) | Specifies if Automatic Updates are Enabled for the Windows Virtual Machine. Defaults to false. | `bool` | `false` | no |
 | <a name="input_availability_set_id"></a> [availability\_set\_id](#input\_availability\_set\_id) | The ID of the Availability Set in which the Virtual Machine should exist. Changing this forces a new resource to be created. | `string` | `null` | no |
 | <a name="input_availability_zone"></a> [availability\_zone](#input\_availability\_zone) | The availability zone where the VM will be deployed. Defaults to null. | `number` | `null` | no |
 | <a name="input_azuread_join"></a> [azuread\_join](#input\_azuread\_join) | Specifies if you want to join this VM to Azure AD. Authenticating to Azure AD requires enabling System Managed Identity (identity\_type). Defaults to 'false' | `bool` | `false` | no |
@@ -57,7 +58,6 @@ Supported Azure services:
 | <a name="input_domain_ou"></a> [domain\_ou](#input\_domain\_ou) | Specifies the domain OU to be used to join the computer in format 'OU=servers,DC=domain,DC=com''. | `string` | `null` | no |
 | <a name="input_domain_user_name"></a> [domain\_user\_name](#input\_domain\_user\_name) | Specifies the domain username to be used to join the computer to domain. | `string` | `null` | no |
 | <a name="input_domain_user_password"></a> [domain\_user\_password](#input\_domain\_user\_password) | Specifies the domain password. | `string` | `null` | no |
-| <a name="input_enable_automatic_updates"></a> [enable\_automatic\_updates](#input\_enable\_automatic\_updates) | Specifies if Automatic Updates are Enabled for the Windows Virtual Machine. Defaults to false. | `bool` | `false` | no |
 | <a name="input_identity_ids"></a> [identity\_ids](#input\_identity\_ids) | A list of User Managed Identity ID's which should be assigned to the Virtual Machine. Defaults to null | `list(string)` | `null` | no |
 | <a name="input_identity_type"></a> [identity\_type](#input\_identity\_type) | The type of Managed Identity which should be assigned to the Virtual Machine. Possible values are 'SystemAssigned', 'UserAssigned' or 'SystemAssigned, UserAssigned'. Defaults to null | `string` | `null` | no |
 | <a name="input_image_id"></a> [image\_id](#input\_image\_id) | The ID of the Operating System Image to be used as source. If not declared, you should declare image\_publisher, image\_offer and image\_sku. | `string` | `null` | no |
@@ -100,10 +100,11 @@ Supported Azure services:
 
 | Name | Description |
 |------|-------------|
-| <a name="output_id"></a> [id](#output\_id) | n/a |
-| <a name="output_name"></a> [name](#output\_name) | n/a |
-| <a name="output_privateipaddress"></a> [privateipaddress](#output\_privateipaddress) | n/a |
-| <a name="output_publicipaddress"></a> [publicipaddress](#output\_publicipaddress) | n/a |
+| <a name="output_id"></a> [id](#output\_id) | The ID of the virtual machine |
+| <a name="output_identity"></a> [identity](#output\_identity) | The identity of the virtual machine |
+| <a name="output_name"></a> [name](#output\_name) | The name of the virtual machine |
+| <a name="output_privateipaddress"></a> [privateipaddress](#output\_privateipaddress) | The private ip address of the virtual machine |
+| <a name="output_publicipaddress"></a> [publicipaddress](#output\_publicipaddress) | The public ip address the virtual machine |
 
 ## Examples
 ```hcl
