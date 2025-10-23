@@ -272,7 +272,7 @@ variable "post_deploy_identity" {
   default     = null
 }
 
-variable "enable_automatic_updates" {
+variable "automatic_updates_enabled" {
   description = "Specifies if Automatic Updates are Enabled for the Windows Virtual Machine. Defaults to false."
   type        = bool
   default     = false
